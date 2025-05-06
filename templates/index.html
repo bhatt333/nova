@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NOVA AI</title>
+  <!-- FontAwesome CDN for icon -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: 'Segoe UI', sans-serif;
+      background: #F4F1EF;
+    }
+    
+    .chat-container {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      max-width: 800px;
+      margin: 0 auto;
+      border-left: 1px solid #ccc;
+      border-right: 1px solid #ccc;
+    }
+    
+    header {
+      background: #3D0C0C;
+      color: #fff;
+      padding: 1rem;
+      text-align: center;
+      font-size: 1.6rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+    
+    .chat-box {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem;
+      background: #F4F1EF;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .message {
+      padding: 0.75rem 1rem;
+      margin: 0.5rem 0;
+      border-radius: 12px;
+      max-width: 80%;
+      line-height: 1.5;
+      word-wrap: break-word;
+      font-size: 1rem;
+      transition: all 0.2s ease;
+    }
+    
+    .message.user {
+      background: #A57A5B;
+      color: white;
+      align-self: flex-end;
+    }
+    
+    .message.bot {
+      background: #D9CFCB;
+      color: #2a2a2a;
+      align-self: flex-start;
+    }
+    
+    .loading {
+      align-self: flex-start;
+      font-style: italic;
+      color: #999;
+      padding-left: 10px;
+      font-size: 0.95rem;
+    }
+    
+    .input-container {
+      display: flex;
+      padding: 0.75rem;
+      border-top: 1px solid #ccc;
+      background: white;
+      gap: 0.5rem;
+      position: relative;
+      z-index: 10;
+    }
+    
+    .input-container input {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      outline: none;
+    }
+    
+    .input-container button {
+      padding: 0.75rem 1.25rem;
+      background: #3D0C0C;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .input-container button:hover {
+      background: #5b1a1a;
+    }
+    
+    .input-container button i {
+      font-size: 1.2rem;
+    }
+    
+    @media (max-width: 600px) {
+      header {
+        font-size: 1.3rem;
+        padding: 0.75rem;
+      }
+    
+      .chat-box {
+        padding: 0.75rem;
+        margin-bottom: 0; /* Remove extra margin to allow proper scroll */
+        max-height: calc(100vh - 130px); /* Ensure chat box scrolls correctly */
+      }
+    
+      .input-container {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 0.5rem;
+        background-color: white;
+        z-index: 10; /* Ensure input container stays on top */
+      }
+    
+      .input-container input {
+        font-size: 0.95rem;
+      }
+    
+      .message {
+        font-size: 0.95rem;
+      }
+    
+      .input-container button {
+        padding: 0.5rem 1rem;
+      }
+    }
+
+    
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <header>NOVA AI</header>
+    <div id="chat-box" class="chat-box"></div>
+    <div class="input-container">
+      <input type="text" id="user-input" placeholder="Type a message..." />
+      <button onclick="sendMessage()">
+        <i class="fas fa-paper-plane"></i> 
+      </button>
+    </div>
+  </div>
+
+  <script>
+    async function sendMessage() {
+      const input = document.getElementById("user-input");
+      const text = input.value.trim();
+      if (!text) return;
+
+      addMessage("user", text);
+      input.value = "";
+
+      const loadingMsg = addLoading();
+
+      try {
+        const response = await fetch("http://192.168.0.198:5000/chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ message: text })
+        });
+
+        const data = await response.json();
+        removeLoading(loadingMsg);
+        addMessage("bot", data.response);
+      } catch (error) {
+        removeLoading(loadingMsg);
+        addMessage("bot", "Error connecting to the server.");
+      }
+    }
+
+    function addMessage(sender, text) {
+      const chatBox = document.getElementById("chat-box");
+      const message = document.createElement("div");
+      message.className = `message ${sender}`;
+      message.innerHTML = text;
+      chatBox.appendChild(message);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function addLoading() {
+      const chatBox = document.getElementById("chat-box");
+      const loading = document.createElement("div");
+      loading.className = "loading";
+      loading.textContent = "NOVA is typing...";
+      chatBox.appendChild(loading);
+      chatBox.scrollTop = chatBox.scrollHeight;
+      return loading;
+    }
+
+    function removeLoading(element) {
+      if (element) element.remove();
+    }
+  </script>
+</body>
+</html>
