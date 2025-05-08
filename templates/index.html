@@ -185,7 +185,7 @@
       input.value = "";
 
       const loadingMsg = addLoading();
-      const stage = 'http://192.168.0.200:5000/chat';
+      const stage = 'http://127.0.0.1:5000/chat';
       const production = 'http://147.182.225.173:5000/chat';
 
       try {
@@ -198,10 +198,12 @@
         });
 
         const data = await response.json();
+        console.log(data)
         removeLoading(loadingMsg);
         addMessage("bot", data.response);
       } catch (error) {
         removeLoading(loadingMsg);
+        console.log(error)
         addMessage("bot", "Error connecting to the server.");
       }
     }
