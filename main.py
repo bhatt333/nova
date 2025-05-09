@@ -22,6 +22,7 @@ client = OpenAI(
     api_key="sk-08cfc88960974acba19cb40b893a90c7",
     base_url="https://api.deepseek.com/v1"
 )
+
 @app.route("/")
 def home():
     return render_template("index.html")
